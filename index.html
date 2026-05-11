@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#7a0808" />
-  <title>Hot Wheels Scanner</title>
+  <title>Hot Wheels Collector Scanner</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,102 +12,203 @@
   <div class="app-shell">
     <header class="app-header">
       <div>
-        <p class="eyebrow">Collector scan tool</p>
-        <h1>Hot Wheels Scanner</h1>
+        <p class="eyebrow">Collector garage</p>
+        <h1>Hot Wheels Collector Scanner</h1>
       </div>
       <div class="flame-mark" aria-hidden="true"></div>
     </header>
 
     <main>
-      <section id="scanPage" class="page active-page" aria-labelledby="scanTitle">
+      <section id="authPage" class="page active-page">
         <div class="panel hero-panel">
-          <h2 id="scanTitle">Scan a card</h2>
-          <p>Capture the front or back, then let Gemini read the visible details.</p>
+          <h2>Collector Account</h2>
+          <p>Sign in or create an account to keep your collection private to your Firebase user ID.</p>
         </div>
 
-        <div id="apiWarning" class="warning" hidden>
-          No Gemini API key found. Open Settings, paste your key, and save it before scanning.
+        <section class="panel auth-panel">
+          <div class="auth-tabs" role="tablist" aria-label="Authentication">
+            <button id="loginTab" class="auth-tab active-auth-tab" type="button" data-auth-mode="login">Login</button>
+            <button id="registerTab" class="auth-tab" type="button" data-auth-mode="register">Register</button>
+          </div>
+
+          <div id="loginForm" class="auth-form">
+            <label class="input-label" for="loginEmail">Email</label>
+            <input id="loginEmail" class="text-input" type="email" autocomplete="email" placeholder="you@example.com" />
+
+            <label class="input-label" for="loginPassword">Password</label>
+            <input id="loginPassword" class="text-input" type="password" autocomplete="current-password" placeholder="Your password" />
+
+            <button id="loginButton" class="primary-button" type="button">Login</button>
+          </div>
+
+          <div id="registerForm" class="auth-form" hidden>
+            <label class="input-label" for="registerDisplayName">Display Name</label>
+            <input id="registerDisplayName" class="text-input" type="text" autocomplete="name" placeholder="Collector name" />
+
+            <label class="input-label" for="registerEmail">Email</label>
+            <input id="registerEmail" class="text-input" type="email" autocomplete="email" placeholder="you@example.com" />
+
+            <label class="input-label" for="registerPassword">Password</label>
+            <input id="registerPassword" class="text-input" type="password" autocomplete="new-password" placeholder="At least 6 characters" />
+
+            <label class="input-label" for="registerConfirmPassword">Confirm Password</label>
+            <input id="registerConfirmPassword" class="text-input" type="password" autocomplete="new-password" placeholder="Repeat password" />
+
+            <button id="registerButton" class="primary-button" type="button">Create Account</button>
+          </div>
+
+          <p id="authMessage" class="status" role="status"></p>
+        </section>
+      </section>
+
+      <section id="scanPage" class="page">
+        <div class="panel hero-panel">
+          <h2>Scan & Identify</h2>
+          <p>Capture the front and back of a card, then save the result to your collection.</p>
         </div>
 
-        <section class="panel">
-          <label class="upload-box" for="imageInput">
+        <div id="authStatus" class="warning">Connecting to Firebase...</div>
+        <section class="panel photo-panel">
+          <label class="upload-box" for="frontImageInput">
             <span class="upload-icon">+</span>
-            <span>Take or choose photo</span>
-            <small>Uses your rear camera on supported phones</small>
+            <span>Front card photo</span>
+            <small>Take or choose the front image</small>
           </label>
-          <input id="imageInput" type="file" accept="image/*" capture="environment" />
-
-          <div id="previewWrap" class="preview-wrap" hidden>
-            <img id="previewImage" alt="Selected Hot Wheels card preview" />
+          <input id="frontImageInput" type="file" accept="image/*" capture="environment" />
+          <div id="frontPreviewWrap" class="preview-wrap" hidden>
+            <img id="frontPreviewImage" alt="Front card preview" />
           </div>
 
-          <div class="mode-toggle" aria-label="Scan mode">
-            <label>
-              <input type="radio" name="scanMode" value="front" checked />
-              <span>Front Card</span>
-            </label>
-            <label>
-              <input type="radio" name="scanMode" value="back" />
-              <span>Back Card</span>
-            </label>
+          <label class="upload-box" for="backImageInput">
+            <span class="upload-icon">+</span>
+            <span>Back card photo</span>
+            <small>Take or choose the back image</small>
+          </label>
+          <input id="backImageInput" type="file" accept="image/*" capture="environment" />
+          <div id="backPreviewWrap" class="preview-wrap" hidden>
+            <img id="backPreviewImage" alt="Back card preview" />
           </div>
 
-          <button id="detectButton" class="primary-button" type="button" disabled>
-            Detect Details
-          </button>
-          <p id="statusMessage" class="status" role="status"></p>
+          <button id="scanButton" class="primary-button" type="button" disabled>Scan & Identify</button>
+          <p id="scanStatus" class="status" role="status"></p>
         </section>
 
         <section class="panel">
           <div class="section-heading">
-            <h2>Detected Details</h2>
+            <h2>Editable Result</h2>
             <span id="confidenceBadge" class="badge">Waiting</span>
           </div>
 
-          <div id="fieldsWrap" class="fields-grid"></div>
+          <div id="resultFields" class="fields-grid"></div>
 
-          <label class="json-label" for="jsonOutput">Combined JSON</label>
-          <textarea id="jsonOutput" rows="10" spellcheck="false"></textarea>
+          <div class="fields-grid collection-inputs">
+            <div class="field">
+              <label for="quantityInput">Quantity</label>
+              <input id="quantityInput" type="number" min="1" step="1" value="1" />
+            </div>
+            <div class="field">
+              <label for="conditionInput">Condition</label>
+              <select id="conditionInput"></select>
+            </div>
+            <div class="field full-field">
+              <label for="notesInput">Notes</label>
+              <textarea id="notesInput" rows="3" placeholder="Optional collector notes"></textarea>
+            </div>
+          </div>
 
           <div class="button-grid">
-            <button id="copyButton" class="secondary-button" type="button">Copy JSON</button>
-            <button id="saveButton" class="secondary-button" type="button">Save Locally</button>
-            <button id="clearButton" class="ghost-button" type="button">Clear</button>
+            <button id="addCollectionButton" class="secondary-button" type="button">Add to Collection</button>
+            <button id="discardScanButton" class="ghost-button" type="button">Discard Scan</button>
           </div>
         </section>
       </section>
 
-      <section id="scansPage" class="page" aria-labelledby="scansTitle">
+      <section id="collectionPage" class="page">
         <div class="panel hero-panel">
-          <h2 id="scansTitle">My Scans</h2>
-          <p>Saved results stay on this device using localStorage.</p>
+          <h2>Collection</h2>
+          <p>Your active Hot Wheels records from Firestore.</p>
         </div>
-        <div id="savedScans" class="saved-list"></div>
+
+        <section class="panel filters-panel">
+          <input id="searchInput" class="text-input" type="search" placeholder="Search car name" />
+          <select id="conditionFilter"></select>
+          <input id="seriesFilter" class="text-input" type="text" placeholder="Filter by series" />
+          <input id="yearFilter" class="text-input" type="text" placeholder="Release year" />
+          <input id="rarityFilter" class="text-input" type="text" placeholder="Rarity" />
+          <input id="caseFilter" class="text-input" type="text" placeholder="Case code" />
+          <select id="sortSelect"></select>
+        </section>
+
+        <div id="collectionList" class="card-list"></div>
       </section>
 
-      <section id="settingsPage" class="page" aria-labelledby="settingsTitle">
+      <section id="archivePage" class="page">
         <div class="panel hero-panel">
-          <h2 id="settingsTitle">Settings</h2>
-          <p>Store your Gemini API key locally for testing.</p>
+          <h2>Archive</h2>
+          <p id="archiveCount">Archive count: 0 / 20</p>
+        </div>
+        <div id="archiveList" class="card-list"></div>
+      </section>
+
+      <section id="statsPage" class="page">
+        <div class="panel hero-panel">
+          <h2>Stats</h2>
+          <p>Quick view of your collection totals.</p>
+          <button id="shareSummaryButton" class="secondary-button hero-action" type="button">Share Collection Summary</button>
+        </div>
+        <div id="statsGrid" class="stats-grid"></div>
+      </section>
+
+      <section id="settingsPage" class="page">
+        <div class="panel hero-panel">
+          <h2>Settings</h2>
+          <p>Email/password Firebase Authentication is used for this MVP. Collection records are private to the signed-in user ID.</p>
         </div>
 
         <section class="panel">
-          <label class="input-label" for="apiKeyInput">Gemini API key</label>
-          <input id="apiKeyInput" class="text-input" type="password" autocomplete="off" placeholder="Paste your API key" />
-          <p class="helper-text">Local testing only. Move Gemini requests to Firebase Cloud Functions before deployment.</p>
-          <button id="saveKeyButton" class="primary-button" type="button">Save API Key</button>
-          <button id="forgetKeyButton" class="ghost-button" type="button">Forget API Key</button>
+          <h2>App Setup</h2>
+          <p class="helper-text">Gemini and Firebase are configured in code for this test build. Enable Email/Password sign-in in Firebase Authentication. Move Gemini calls to Firebase Cloud Functions before public deployment.</p>
+        </section>
+
+        <section class="panel">
+          <h2>Account</h2>
+          <p id="accountEmail" class="helper-text">Not signed in.</p>
+          <label class="input-label" for="settingsGeminiKey">Gemini API key</label>
+          <input id="settingsGeminiKey" class="text-input" type="password" autocomplete="off" placeholder="Gemini API key" />
+          <p class="helper-text">Stored in this browser for testing only. Public apps should call Gemini from Firebase Cloud Functions.</p>
+          <button id="saveGeminiKeyButton" class="secondary-button" type="button">Save Gemini Key</button>
+          <button id="logoutButton" class="ghost-button" type="button">Log Out</button>
         </section>
       </section>
     </main>
 
-    <nav class="bottom-nav" aria-label="Main navigation">
+    <nav id="bottomNav" class="bottom-nav" aria-label="Main navigation" hidden>
       <button class="nav-button active-nav" type="button" data-page="scanPage">Scan</button>
-      <button class="nav-button" type="button" data-page="scansPage">My Scans</button>
-      <button class="nav-button" type="button" data-page="settingsPage">Settings</button>
+      <button class="nav-button" type="button" data-page="collectionPage">Collection</button>
+      <button id="menuButton" class="nav-button menu-toggle" type="button" aria-expanded="false" aria-controls="menuSheet">
+        <span class="burger-lines" aria-hidden="true"></span>
+        <span>Menu</span>
+      </button>
     </nav>
+
+    <div id="menuSheet" class="menu-sheet" hidden>
+      <button class="menu-item" type="button" data-page="archivePage">Archive</button>
+      <button class="menu-item" type="button" data-page="statsPage">Stats</button>
+      <button class="menu-item" type="button" data-page="settingsPage">Settings</button>
+    </div>
   </div>
 
-  <script src="app.js"></script>
+  <dialog id="editDialog" class="edit-dialog">
+    <form method="dialog" class="panel dialog-panel">
+      <h2>Edit Collection Item</h2>
+      <div id="editFields" class="fields-grid"></div>
+      <div class="button-grid">
+        <button id="saveEditButton" class="secondary-button" type="button">Save Changes</button>
+        <button class="ghost-button" type="submit">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

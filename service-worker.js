@@ -1,10 +1,12 @@
-const CACHE_NAME = "hot-wheels-scanner-v1";
+const CACHE_NAME = "hot-wheels-collector-scanner-v2";
 const APP_FILES = [
   "./",
-  "index.html",
-  "style.css",
-  "app.js",
-  "manifest.json"
+  "./index.html",
+  "./style.css",
+  "./app.js",
+  "./firebase-config.js",
+  "./firestore.rules",
+  "./manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
@@ -34,7 +36,11 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request).catch(() => caches.match("./index.html"));
     })
   );
 });
