@@ -260,6 +260,8 @@ function setAuthMode(mode) {
   els.registerForm.hidden = isLogin;
   els.loginTab.classList.toggle("active-auth-tab", isLogin);
   els.registerTab.classList.toggle("active-auth-tab", !isLogin);
+  els.loginTab.setAttribute("aria-selected", String(isLogin));
+  els.registerTab.setAttribute("aria-selected", String(!isLogin));
   els.authMessage.textContent = "";
 }
 
