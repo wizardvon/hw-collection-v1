@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7a0808" />
+  <title>Hot Wheels Scanner</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Collector scan tool</p>
+        <h1>Hot Wheels Scanner</h1>
+      </div>
+      <div class="flame-mark" aria-hidden="true"></div>
+    </header>
+
+    <main>
+      <section id="scanPage" class="page active-page" aria-labelledby="scanTitle">
+        <div class="panel hero-panel">
+          <h2 id="scanTitle">Scan a card</h2>
+          <p>Capture the front or back, then let Gemini read the visible details.</p>
+        </div>
+
+        <div id="apiWarning" class="warning" hidden>
+          No Gemini API key found. Open Settings, paste your key, and save it before scanning.
+        </div>
+
+        <section class="panel">
+          <label class="upload-box" for="imageInput">
+            <span class="upload-icon">+</span>
+            <span>Take or choose photo</span>
+            <small>Uses your rear camera on supported phones</small>
+          </label>
+          <input id="imageInput" type="file" accept="image/*" capture="environment" />
+
+          <div id="previewWrap" class="preview-wrap" hidden>
+            <img id="previewImage" alt="Selected Hot Wheels card preview" />
+          </div>
+
+          <div class="mode-toggle" aria-label="Scan mode">
+            <label>
+              <input type="radio" name="scanMode" value="front" checked />
+              <span>Front Card</span>
+            </label>
+            <label>
+              <input type="radio" name="scanMode" value="back" />
+              <span>Back Card</span>
+            </label>
+          </div>
+
+          <button id="detectButton" class="primary-button" type="button" disabled>
+            Detect Details
+          </button>
+          <p id="statusMessage" class="status" role="status"></p>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <h2>Detected Details</h2>
+            <span id="confidenceBadge" class="badge">Waiting</span>
+          </div>
+
+          <div id="fieldsWrap" class="fields-grid"></div>
+
+          <label class="json-label" for="jsonOutput">Combined JSON</label>
+          <textarea id="jsonOutput" rows="10" spellcheck="false"></textarea>
+
+          <div class="button-grid">
+            <button id="copyButton" class="secondary-button" type="button">Copy JSON</button>
+            <button id="saveButton" class="secondary-button" type="button">Save Locally</button>
+            <button id="clearButton" class="ghost-button" type="button">Clear</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="scansPage" class="page" aria-labelledby="scansTitle">
+        <div class="panel hero-panel">
+          <h2 id="scansTitle">My Scans</h2>
+          <p>Saved results stay on this device using localStorage.</p>
+        </div>
+        <div id="savedScans" class="saved-list"></div>
+      </section>
+
+      <section id="settingsPage" class="page" aria-labelledby="settingsTitle">
+        <div class="panel hero-panel">
+          <h2 id="settingsTitle">Settings</h2>
+          <p>Store your Gemini API key locally for testing.</p>
+        </div>
+
+        <section class="panel">
+          <label class="input-label" for="apiKeyInput">Gemini API key</label>
+          <input id="apiKeyInput" class="text-input" type="password" autocomplete="off" placeholder="Paste your API key" />
+          <p class="helper-text">Local testing only. Move Gemini requests to Firebase Cloud Functions before deployment.</p>
+          <button id="saveKeyButton" class="primary-button" type="button">Save API Key</button>
+          <button id="forgetKeyButton" class="ghost-button" type="button">Forget API Key</button>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-button active-nav" type="button" data-page="scanPage">Scan</button>
+      <button class="nav-button" type="button" data-page="scansPage">My Scans</button>
+      <button class="nav-button" type="button" data-page="settingsPage">Settings</button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
