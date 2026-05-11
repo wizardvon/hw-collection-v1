@@ -1,4 +1,4 @@
-const GEMINI_API_KEY = "PASTE_YOUR_GEMINI_API_KEY_HERE";
+const GEMINI_API_KEY = "AIzaSyDfFC86rHI2FT_jMYbG3u6NmCr3C2REUEE";
 // This API key setup is for local testing only. Do not publish this publicly. Move the API call to Firebase Cloud Functions before deployment.
 
 const GEMINI_MODEL = "gemini-2.5-flash";
